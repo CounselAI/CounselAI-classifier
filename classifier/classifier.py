@@ -38,8 +38,11 @@ def classify_query(query: str):
         data += choice.message.content
     if data[-1] == '.':
         data = data[:-1]
-    print(data)
-    return json.loads(df[df['Issue_area'] == data].to_json(orient='records'))
+    df = df[df['Issue_area'] == data]
+    for idx in df.index:
+        df['Facts'][idx] = remove_html(df['Facts'][idx])
+
+    return json.loads(df.to_json(orient='records'))
 
 
 def summarize_chatgpt(ids: list):
@@ -71,12 +74,20 @@ def summarize_chatgpt(ids: list):
 
 def summarize_nlp(ids: list):
     data = []
+    references = []
     df = pd.read_csv('justice.csv')
     df.columns = [x.capitalize() for x in df.columns]
     for id in ids:
+        url = requests.get(df.loc[df['Id'] == id]['Href'].values[0]).json()[
+            "justia_url"]
         data.append(df[df['Id'] == id]['Facts'].values[0])
+        references.append(
+            url if url else df.loc[df['Id'] == id]['Href'].values[0])
     data = ". ".join(data)
     data = nlpsummarizer.generate_summary(data, 10)
+    data += "\n\nReferences:\n"
+    for idx, ref in enumerate(references):
+        data += f" {idx+1}. {ref}\n"
     data = remove_html(data)
     return data
 
