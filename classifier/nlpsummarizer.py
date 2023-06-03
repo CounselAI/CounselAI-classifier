@@ -53,4 +53,4 @@ def generate_summary(txt, top_n=500) -> str:
 
 
 if __name__ == "__main__":
-    generate_summary("tigercat.txt", 10)
+    generate_summary("This is a very long text", 10)
