@@ -1,9 +1,17 @@
 from pydantic import BaseModel
 from classifier import classifier
 from fastapi import FastAPI
+
+from fastapi.middleware.cors import CORSMiddleware
 import dotenv
 dotenv.load_dotenv(".env")
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+)
 
 
 class ID(BaseModel):
@@ -53,4 +61,5 @@ def compile_item(data: ID):
 
 @app.post("/cases/query")
 def query_item(query: Query):
+    print(query)
     return {"data": classifier.classify_query(query.query)}

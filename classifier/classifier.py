@@ -9,7 +9,7 @@ from . import nlpsummarizer
 import openai
 import requests
 import ai21
-# openai.api_key = OPENAPI_KEY
+openai.api_key = OPENAPI_KEY
 
 
 def get_all():
@@ -32,7 +32,8 @@ def classify_query(query: str):
     data = ""
     for choice in response.choices:
         data += choice.message.content
-    data.replace(".", "")
+    if data[-1] == '.':
+        data = data[:-1]
     print(data)
     return json.loads(df[df['Issue_area'] == data].to_json(orient='records'))
 
