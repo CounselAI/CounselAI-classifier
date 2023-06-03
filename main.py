@@ -38,8 +38,17 @@ def compile_item(data: ID):
     for id in data.ids:
         ids.append(int(id))
     data = classifier.summarize_nlp(ids)
-    data = data.replace("<p>", "").replace("</p>", "")
-    return {"data": classifier.summarize_nlp(ids)}
+    return {"data": data}
+
+
+@app.post("/cases/compile/ai21")
+def compile_item(data: ID):
+    ids = []
+    for id in data.ids:
+        ids.append(int(id))
+
+    data = classifier.summarize_ai21(ids)
+    return {'data': data}
 
 
 @app.post("/cases/query")

@@ -1,17 +1,15 @@
 import pandas as pd
 import json
 from bs4 import BeautifulSoup
-from .api import OPENAPI_KEY
+from pprint import pprint
+from .api import OPENAPI_KEY, AI21_KEY
 from . import nlpsummarizer
+# from api import OPENAPI_KEY
+# import nlpsummarizer
 import openai
 import requests
-
-openai.api_key = OPENAPI_KEY
-
-
-def remove_html(text: str) -> str:
-    bs = BeautifulSoup(text, 'html.parser')
-    return bs.get_text()
+import ai21
+# openai.api_key = OPENAPI_KEY
 
 
 def get_all():
@@ -72,10 +70,24 @@ def summarize_nlp(ids: list):
     df.columns = [x.capitalize() for x in df.columns]
     for id in ids:
         data.append(df[df['Id'] == id]['Facts'].values[0])
-    data = remove_html(". ".join(data))
+    data = ". ".join(data)
     data = nlpsummarizer.generate_summary(data, 10)
     return data
 
 
+def summarize_ai21(ids: list):
+    data = []
+
+    ai21.api_key = AI21_KEY
+    df = pd.read_csv('justice.csv')
+    df.columns = [x.capitalize() for x in df.columns]
+    for id in ids:
+        data.append(df[df['Id'] == id]['Facts'].values[0])
+    data = ". ".join(data)[:499]
+    res = ai21.Paraphrase.execute(text=data,
+                                  style="long")
+    return res['suggestions'][0]['text']
+
+
 if __name__ == "__main__":
-    print(summarize_nlp([50606, 50644]))
+    print(summarize_ai21([50606, 50644]))
