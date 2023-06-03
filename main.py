@@ -5,27 +5,43 @@ import dotenv
 dotenv.load_dotenv(".env")
 app = FastAPI()
 
+
 class ID(BaseModel):
-    ids:list
+    ids: list
+
+
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
 
+
 class Query(BaseModel):
-    query:str
+    query: str
+
 
 @app.get("/cases/")
 def read_item():
-    return {"data":classifier.get_all()}
+    return {"data": classifier.get_all()}
 
-@app.post("/cases/compile")
+
+@app.post("/cases/compile/chatgpt")
 def compile_item(data: ID):
-    ids=[]
+    ids = []
     for id in data.ids:
         ids.append(int(id))
-    print(ids)
-    return {"data":classifier.summarize(ids)}
+    return {"data": classifier.summarize_chatgpt(ids)}
+
+
+@app.post("/cases/compile/nlp")
+def compile_item(data: ID):
+    ids = []
+    for id in data.ids:
+        ids.append(int(id))
+    data = classifier.summarize_nlp(ids)
+    data = data.replace("<p>", "").replace("</p>", "")
+    return {"data": classifier.summarize_nlp(ids)}
+
 
 @app.post("/cases/query")
 def query_item(query: Query):
-    return {"data":classifier.classify_query(query.query)}
+    return {"data": classifier.classify_query(query.query)}
